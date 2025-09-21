@@ -1,0 +1,342 @@
+{% extends "core/base.html" %}
+
+{% block title %}Submit Contact - Submissions Portal{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Contact Submissions</h1>
+    <p class="page-subtitle">Submit your inquiry and view recent submissions</p>
+</div>
+
+<div class="grid">
+    <!-- Submission Form -->
+    <div class="form-section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">New Submission</h2>
+            </div>
+            <div class="card-content">
+                <form action="{% url 'core:submit_contact' %}" method="post" class="contact-form">
+                    {% csrf_token %}
+                    {% if form %}
+                        {{ form.as_p }}
+                    {% else %}
+                        <div class="form-group">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-input" placeholder="your.email@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea id="message" name="message" rows="4" class="form-input" placeholder="Enter your message or inquiry..." required></textarea>
+                        </div>
+                    {% endif %}
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m22 2-7 20-4-9-9-4Z"/>
+                                <path d="M22 2 11 13"/>
+                            </svg>
+                            Submit Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Submissions -->
+    <div class="submissions-section">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Recent Submissions</h2>
+                <div class="submission-stats">
+                    <span class="stat-badge">{{ contacts|length }} total</span>
+                </div>
+            </div>
+            <div class="submissions-container">
+                {% for c in contacts %}
+                    <div class="submission-item">
+                        <div class="submission-header">
+                            <div class="submitter-info">
+                                <div class="submitter-avatar">{{ c.name|first|upper }}</div>
+                                <div class="submitter-details">
+                                    <div class="submitter-name">{{ c.name }}</div>
+                                    <div class="submitter-email">{{ c.email }}</div>
+                                </div>
+                            </div>
+                            <div class="submission-meta">
+                                <div class="submission-date">{{ c.created_at|date:"M d, Y" }}</div>
+                                <div class="submission-time">{{ c.created_at|date:"H:i" }}</div>
+                            </div>
+                        </div>
+                        <div class="submission-message">
+                            {{ c.message|linebreaks }}
+                        </div>
+                        <div class="submission-actions">
+                            <button class="action-btn">Reply</button>
+                            <button class="action-btn">Archive</button>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="empty-title">No submissions yet</h3>
+                        <p class="empty-description">When people submit the form above, their messages will appear here.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    
+    /* Form Styles */
+    .contact-form {
+        max-width: none;
+    }
+    
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 13px;
+        transition: all 0.2s ease;
+        background: var(--card-background);
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    }
+    
+    .form-input::placeholder {
+        color: var(--text-muted);
+    }
+    
+    .form-actions {
+        margin-top: 1.5rem;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 13px;
+        font-weight: 500;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .btn-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* Submissions Styles */
+    .submission-stats {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .stat-badge {
+        background: var(--background);
+        color: var(--text-secondary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .submissions-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .submission-item {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.2s ease;
+    }
+    
+    .submission-item:last-child {
+        border-bottom: none;
+    }
+    
+    .submission-item:hover {
+        background: var(--background);
+    }
+    
+    .submission-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+    
+    .submitter-info {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .submitter-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .submitter-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    .submitter-email {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+    
+    .submission-meta {
+        text-align: right;
+    }
+    
+    .submission-date {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    
+    .submission-time {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+    
+    .submission-message {
+        font-size: 13px;
+        color: var(--text-primary);
+        line-height: 1.5;
+        margin-bottom: 0.75rem;
+        padding-left: 2.5rem;
+    }
+    
+    .submission-actions {
+        display: flex;
+        gap: 0.5rem;
+        padding-left: 2.5rem;
+    }
+    
+    .action-btn {
+        font-size: 11px;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--border-color);
+        background: var(--card-background);
+        color: var(--text-secondary);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .action-btn:hover {
+        background: var(--background);
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+    }
+    
+    .empty-icon {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+    }
+    
+    .empty-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.5rem 0;
+    }
+    
+    .empty-description {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .submission-header {
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        
+        .submission-meta {
+            text-align: left;
+        }
+        
+        .submission-message,
+        .submission-actions {
+            padding-left: 0;
+        }
+    }
+</style>
+{% endblock %}
